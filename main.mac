@@ -1,0 +1,201 @@
+#=====================================================
+# VERBOSITY
+#=====================================================
+
+/control/execute verbose.mac
+
+#=====================================================
+# GEOMETRY
+#=====================================================
+/gate/geometry/setMaterialDatabase GateMaterials.db
+
+# WORLD
+/gate/world/setMaterial            Vacuum
+/gate/world/geometry/setXLength    1 m
+/gate/world/geometry/setYLength    1 m
+/gate/world/geometry/setZLength    1.5 m
+/gate/world/vis/setVisible 1
+
+
+#Scanner2
+#/gate/world/daughters/name Phant2
+#/gate/world/daughters/insert box
+#/gate/Phant2/setMaterial Water
+#/gate/Phant2/geometry/setXLength 1 cm
+#/gate/Phant2/geometry/setYLength 1 cm
+#/gate/Phant2/geometry/setZLength 3 cm    
+#/gate/Phant2/vis/forceSolid
+#/gate/Phant2/vis/setColor blue
+#/gate/Phant2/placement/setTranslation 0. 0. -50 cm
+
+#Scanner
+/gate/world/daughters/name Phant
+/gate/world/daughters/insert box
+/gate/Phant/setMaterial Water
+/gate/Phant/geometry/setXLength 20 cm
+/gate/Phant/geometry/setYLength 20 cm
+/gate/Phant/geometry/setZLength 5 cm    
+/gate/Phant/vis/forceSolid
+/gate/Phant/vis/setColor blue
+/gate/Phant/placement/setTranslation 0. 0. -32.5 cm
+
+#target
+/gate/world/daughters/name target
+/gate/world/daughters/insert box
+/gate/target/setMaterial Tungsten
+/gate/target/geometry/setXLength 20 cm
+/gate/target/geometry/setYLength 20 cm
+/gate/target/geometry/setZLength 2 cm
+/gate/target/vis/forceSolid
+/gate/target/vis/setColor red
+/gate/target/placement/setTranslation 0. 0. -40. cm
+
+#/control/execute linac_flattening_filter.mac
+#/control/execute Colimadores.mac
+#/control/execute ColimadorPrimario.mac
+
+
+#=====================================================
+# PHYSICS
+#=====================================================
+
+
+/gate/physics/addPhysicsList           emstandard_opt3
+
+/gate/physics/Gamma/SetCutInRegion     world 10 mm
+/gate/physics/Electron/SetCutInRegion  world 10 mm
+
+#=====================================================
+# DETECTORS
+#=====================================================
+
+/gate/actor/addActor SimulationStatisticActor SSA
+/gate/actor/SSA/save                          SSA.txt
+
+#/gate/actor/addActor DoseActor                DAVW
+#/gate/actor/DAVW/save                         DAVW.mhd
+#/gate/actor/DAVW/attachTo                     Phant
+#/gate/actor/DAVW/stepHitType                  random
+#/gate/actor/DAVW/setDoseAlgorithm             VolumeWeighting
+#/gate/actor/DAVW/setResolution                40 40 40
+#/gate/actor/DAVW/enableDose                   true
+#/gate/actor/DAVW/enableSquaredDose            true
+#/gate/actor/DAVW/enableUncertaintyDose        true
+#/gate/actor/DAVW/normaliseDoseToMax          true
+
+#/gate/actor/addActor DoseActor                DAMW
+#/gate/actor/DAMW/save                         DAMW.mhd
+#/gate/actor/DAMW/attachTo                     Phant
+#/gate/actor/DAMW/stepHitType                  random
+#/gate/actor/DAMW/setDoseAlgorithm             MassWeighting
+#/gate/actor/DAMW/setResolution                40 40  40
+#/gate/actor/DAMW/enableDose                   true
+#/gate/actor/DAMW/enableSquaredDose            true
+#/gate/actor/DAMW/enableUncertaintyDose        true
+#/gate/actor/DAMW/exportMassImage              DAMW-Mass.mhd
+#/gate/actor/DAMW/normaliseDoseToMax           true
+
+/gate/actor/addActor DoseActor                DAVW2
+/gate/actor/DAVW2/save                         DAVWTar.mhd
+/gate/actor/DAVW2/attachTo                     Phant
+/gate/actor/DAVW2/stepHitType                  random
+/gate/actor/DAVW2/setDoseAlgorithm             VolumeWeighting
+/gate/actor/DAVW2/setResolution               1 1 200
+/gate/actor/DAVW2/enableDose                   true
+/gate/actor/DAVW2/enableSquaredDose            true
+/gate/actor/DAVW2/enableUncertaintyDose        true
+/gate/actor/DAVW2/normaliseDoseToMax          false
+/gate/actor/DAVW2/enableEdep                  true
+/gate/actor/DAVW2/enableDoseToWater                   true
+/gate/actor/DAVW2/enableUncertaintyDoseToWater        true
+
+/gate/actor/addActor DoseActor                DAMW2
+/gate/actor/DAMW2/save                         DAMWTar.mhd
+/gate/actor/DAMW2/attachTo                     Phant
+/gate/actor/DAMW2/stepHitType                  random
+/gate/actor/DAMW2/setDoseAlgorithm             MassWeighting
+/gate/actor/DAMW2/setResolution                50 50 1
+/gate/actor/DAMW2/enableDose                   true
+/gate/actor/DAMW2/enableSquaredDose            true
+/gate/actor/DAMW2/enableUncertaintyDose        true
+/gate/actor/DAMW2/exportMassImage              DAMW-Mass2.mhd
+/gate/actor/DAMW2/normaliseDoseToMax           false
+/gate/actor/DAMW2/enableEdep                   true
+/gate/actor/DAMW2/enableDoseToWater                   true
+/gate/actor/DAMW2/enableUncertaintyDoseToWater        true
+
+/gate/actor/addActor    ParticleInVolumeActor       MyActor
+/gate/actor/MyActor/save                            MyOutputFile.hdr
+/gate/actor/MyActor/attachTo                        Phant
+/gate/actor/MyActor/setResolution                   40 40 1 
+/gate/actor/MyActor/stepHitType                     post
+
+/gate/actor/addActor EmCalculatorActor            MyActor2
+/gate/actor/MyActor2/setParticleName               e-
+/gate/actor/MyActor2/setEnergy                     12 MeV
+/gate/actor/MyActor2/save                          MyOutput.txt
+
+/gate/actor/addActor PhaseSpaceActor         MyActor3
+/gate/actor/MyActor3/save                     MyOutputFileSpace.root
+/gate/actor/MyActor3/attachTo                 Phant
+/gate/actor/MyActor3/enableEkine              true
+/gate/actor/MyActor3/enableXPosition          false
+/gate/actor/MyActor3/enableYPosition          false
+/gate/actor/MyActor3/enableZPosition          false
+/gate/actor/MyActor3/enableXDirection         false
+/gate/actor/MyActor3/enableYDirection         false
+/gate/actor/MyActor3/enableZDirection         false
+/gate/actor/MyActor3/enableProductionVolume   true
+/gate/actor/MyActor3/enableProductionProcess  true
+/gate/actor/MyActor3/enableParticleName       true
+/gate/actor/MyActor3/enableWeight             false
+
+
+
+/gate/actor/addActor  EnergySpectrumActor                MyActor4
+/gate/actor/MyActor4/save                                 MyOutputFileEne.root
+/gate/actor/MyActor4/energySpectrum/setEmin               0 eV
+/gate/actor/MyActor4/energySpectrum/setEmax               15 MeV
+/gate/actor/MyActor4/energySpectrum/setNumberOfBins       2000
+
+#=====================================================
+# INITIALISATION
+#=====================================================
+
+/gate/run/initialize
+
+/gate/random/setEngineName MersenneTwister
+/gate/random/setEngineSeed auto
+
+
+#=====================================================
+# BEAM
+#=====================================================
+/gate/source/addSource electron_beam gps
+/gate/source/electron_beam/gps/particle e-
+/gate/source/electron_beam/gps/ene/type Gauss
+/gate/source/electron_beam/gps/ene/mono 12.2 MeV
+/gate/source/electron_beam/gps/ene/sigma 0.0216 MeV
+/gate/source/electron_beam/gps/centre 0 0 -55 cm
+/gate/source/electron_beam/gps/angtype iso
+/gate/source/electron_beam/gps/mintheta 0 deg
+/gate/source/electron_beam/gps/maxtheta 0 deg
+/gate/source/electron_beam/gps/minphi 0 deg
+/gate/source/electron_beam/gps/maxphi 0 deg
+/gate/source/electron_beam/gps/type Plane
+/gate/source/electron_beam/gps/shape Circle
+/gate/source/electron_beam/gps/radius 1.4 mm
+
+
+#=====================================================
+# VISUALISATION
+#=====================================================
+
+#/control/execute visu.mac
+
+#=====================================================
+# START BEAMS
+#=====================================================
+
+/gate/application/setTotalNumberOfPrimaries 1e8
+/gate/application/start
